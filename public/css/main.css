@@ -3,8 +3,6 @@
   --red: hsla(353, 42%, 32%, 1);
   --wine: hsla(61, 81%, 74%, 1);
   font-size: calc(1vw + 1vh + 0.5vmin);
-  --Nhexa: 4;
-  --hexa-size: calc(calc(100vw / var(--Nhexa)) - 2vw);
 }
 
 * {
@@ -33,6 +31,12 @@ form {
 }
 
 button {
+  font-family: "Source Sans Pro", "Palatino", monospace;
+}
+
+input {
+  font-size: 1rem;
+  font-weight: normal;
   font-family: "Source Sans Pro", "Palatino", monospace;
 }
 
