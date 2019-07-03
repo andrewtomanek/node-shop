@@ -1,0 +1,74 @@
+.orders {
+  display: grid;
+  grid-row-gap: 2rem;
+  place-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  padding: 0.5rem;
+  list-style: none;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.orders__item h1 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.orders__item {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+  padding: 2rem;
+  width: 100%;
+  height: 100%;
+  background-color: hsla(61, 81%, 74%, 0.2);
+}
+
+.orders__products {
+  display: grid;
+  grid-row-gap: 1rem;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.orders__products-item {
+  display: grid;
+  grid-auto-flow: column;
+  grid-column-gap: 3rem;
+  justify-content: start;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  margin: 0;
+  padding: 0.5rem;
+  border: 2px solid hsla(353, 32%, 32%, 0.3);
+  background-color: hsla(61, 81%, 74%, 0.4);
+  color: hsla(353, 32%, 32%, 1);
+  width: 100%;
+  height: 100%;
+}
+
+.total-line {
+  display: grid;
+  grid-auto-flow: column;
+  grid-column-gap: 3rem;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  align-content: center;
+  margin: 0;
+  padding: 0.5rem;
+  color: hsla(353, 32%, 32%, 1);
+  font-size: 1.2rem;
+  width: 100%;
+  height: 100%;
+}

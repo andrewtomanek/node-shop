@@ -1,0 +1,50 @@
+.product-form {
+    width: 20rem;
+    max-width: 90%;
+    margin: auto;
+    display: block;
+}
+
+.card__header {
+    display: grid;
+    grid-template-rows: 5vh 5vh;
+    align-items: center;
+    justify-items: center;
+}
+
+.product__title {
+    font-size: 1.3rem;
+    text-align: center;
+}
+
+.product__category {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.product__price {
+    font-size: 1.5rem;
+    text-align: center;
+    color: hsla(353, 32%, 32%,1);
+    width: 100%;
+}
+
+.product__sale {
+    font-size: 1.5rem;
+    text-align: center;
+    color: rgb(255, 0, 43);
+    width: 100%;
+}
+
+.product__stock-quantity {
+    font-size: 1rem;
+    text-align: center;
+    color: hsla(353, 32%, 32%,0.5);
+    width: 100%;
+}
+
+.product__description {
+    text-align: center;
+    font-size: 0.9rem;
+    height: 100%;
+}

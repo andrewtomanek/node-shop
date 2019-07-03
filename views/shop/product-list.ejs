@@ -1,0 +1,91 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+
+            <main>
+                <% if (prods.length > 0) { %>
+                <div class="sort__controls">
+                    <form action="/products" method="post" id="selectSort">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="currentPage" value="<%= currentPage %>">
+                    <label for="select-sort">Třídit:</label>
+<select name="sortMethod" id="select-sort" form="selectSort">
+    <option value="title">od A po Z</option>
+    <option value="-title">od Z po A</option>
+    <option value="price">cena vzestupně</option>
+    <option value="-price">cena sestupně</option>
+</select>
+<button class="btn" type="submit">Seřadit</button>
+</form>
+
+<form action="/products" method="post" id="selectCategory">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="currentPage" value="<%= currentPage %>">
+                    <label for="category">Kategorie:</label>
+<select name="pickCategory" id="category" form="selectCategory">
+    <option value="">vše</option>
+    <option value="Červená vína">Červená vína</option>
+    <option value="Bílá vína">Bílá vína</option>
+    <option value="Šumivá vína">Šumivá vína</option>
+    <option value="Dárkové předměty">Dárkové předměty</option>
+    <option value="Skleničky">Skleničky</option>
+    <option value="ostatní">ostatní</option>
+
+</select>
+<button class="btn" type="submit">Vyfiltrovat</button>
+</form>
+                </div>
+
+                    <div class="grid">
+                        <% for (let product of prods) { %>
+                            <article class="card product-item">
+                                <header class="card__header">
+                                        <a class="detail__link" href="/products/<%= product._id %>">
+                                    <h1 class="product__title"><%= product.title %></h1>
+                                    </a>
+                            <h4 class="product__category"><%= product.category %></h>
+                                </header>
+                                <div class="card__image">
+                                        <a class="detail__link" href="/products/<%= product._id %>">
+                                    <img src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+                                    </a>
+                                </div>
+                                <div class="card__content">
+                                    <p class="product__description">
+                                        <%= product.description %>
+                                    </p>
+                                </div>
+                                <div class="card__actions">
+                                        <div class="card__price">
+                                        <p class="product__stock-quantity">skladem:
+                                                <%= product.stockQuantity %>
+                                            </p>
+                                            <h2 class="product__price">Kc
+                                                <%= product.price %>
+                                            </h2>
+                                            <% if (product.sale ) { %>
+                                                <h3 class="product__sale">Akce</h3>
+                                            <% } %>
+                                            </h3>
+                                                </div>
+                                    <% if (isAuthenticated) { %>
+
+                                        <% if (product.stockQuantity > 0) { %>
+                                        <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                        <% } else { %>
+                                            <h2>Není skladem!</h2>
+                                            <% } %>
+                                    <% } %>
+                                </div>
+                            </article>
+                            <% } %>
+                    </div>
+                    <%- include('../includes/pagination.ejs', {currentPage: currentPage, nextPage: nextPage, previousPage: previousPage, lastPage: lastPage, hasNextPage: hasNextPage, hasPreviousPage: hasPreviousPage}) %>
+                    <% } else { %>
+                        <h1>Žádné zboží!</h1>
+                        <% } %>
+            </main>
+            <%- include('../includes/end.ejs') %>

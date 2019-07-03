@@ -1,0 +1,22 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main class="centered">
+            <h1><%= product.title %></h1>
+            <hr>
+            <div class="detail__image-box">
+                <img class="detail__image" src="/<%= product.imageUrl %>" alt="<%= product.title %>">
+            </div>
+            <h2> Cena: <%= product.price %></h2>
+            <p><%= product.description %></p>
+            <% if (isAuthenticated) { %>
+                <% if (product.stockQuantity > 0) { %>
+                <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                <% } else { %>
+                    <h2>Není skladem!</h2>
+                    <% } %>
+            <% } %>
+        </main>
+        <%- include('../includes/end.ejs') %>

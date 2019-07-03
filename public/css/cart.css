@@ -1,0 +1,11 @@
+.cart__item h1,
+.cart__item h2 {
+  margin-right: 1rem;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.cart-image {
+  max-width: 100%;
+  max-height: 10vh;
+}

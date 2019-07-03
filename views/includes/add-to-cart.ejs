@@ -1,0 +1,20 @@
+<form class="add-cart" action="/cart" method="post">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <button class="buy-button" type="submit">Přidat do košíku</button>
+  <input
+    type="number"
+    class="input__integer"
+    step="1"
+    pattern="\d+"
+    name="productQuantity"
+    value="1"
+    min="1"
+    max="100"
+  />
+  <input type="hidden" name="productId" value="<%= product._id %>" />
+  <input
+    type="hidden"
+    name="stockQuantity"
+    value="<%= product.stockQuantity %>"
+  />
+</form>

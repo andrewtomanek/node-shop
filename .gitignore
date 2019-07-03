@@ -1,0 +1,8 @@
+node_modules
+.env
+nodemon.json
+server.cert
+server.key
+data/invoices
+access.log
+enviromet-variables.txt

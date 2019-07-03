@@ -1,0 +1,74 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/cart.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main class="cart__wrap">
+                <%let totalSum = 0 %>
+            <% if (products.length > 0) { %>
+                <ul class="cart__item-list">
+                    <% products.forEach(p => { %>
+                        <li class="cart__item">
+                                <h1><%= p.productId.title %></h1>
+                                <% for( let elem in adminProducts) {%>
+                                    <% if (adminProducts[elem]._id.toString() === p.productId._id.toString()) { %>
+                                    <img class="cart-image" src="/<%= adminProducts[elem].imageUrl %>" >
+                                    <h2>Skladem: <%= adminProducts[elem].stockQuantity %></h2>
+                                    <% if (adminProducts[elem].stockQuantity > 0) { %>
+                                        <form action="/change-cart" method="POST">
+                                            <input type="number"  value="<%= p.quantity %>" class="input__integer" step="1" pattern="\d+" name="productQuantity" min="1" max="100">
+                                            <% for( let elem in adminProducts) {%>
+                                                <% if (adminProducts[elem]._id.toString() === p.productId._id.toString()) { %>
+                                                    <input type="hidden" value="<%=  adminProducts[elem].stockQuantity %>" name="adminProducts">
+                                                            <% } %>
+                                                        <% } %>
+                                            <input type="hidden" value="<%= p.productId._id %>" name="productId">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button class="btn" type="submit">Změnit</button>
+                                        </form>
+                                        <form action="/cart-add-one-item" method="POST">
+                                            <input type="hidden" value="<%= p.productId._id %>" name="productId">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <button class="btn danger" type="submit">+</button>
+                                        </form>
+                                                                <% } %>
+                                                <% } %>
+                                            <% } %>
+                            <form action="/cart-remove-one-item" method="POST">
+                                <input type="hidden" value="<%= p.productId._id %>" name="productId">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="btn danger" type="submit">-</button>
+                            </form>
+
+
+                            <form action="/cart-delete-item" method="POST">
+                                <input type="hidden"  value="<%= p.quantity %>"  name="productQuantity">
+                                <input type="hidden" value="<%= p.productId._id %>" name="productId">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="btn danger" type="submit">Odstranit</button>
+                            </form>
+                            <h2>Cena: <%= p.productPrice %></h2>
+                            <h2>Množství: <%= p.quantity %></h2>
+                            <h2>Suma: <%= p.productPrice * p.quantity %></h2>
+                             <% totalSum += p.productPrice * p.quantity %>
+                        </li>
+                    <% }) %>
+                </ul>
+                <hr>
+                <div class="order__box">
+                        <h2>Celková suma: <%= totalSum %></h2>
+                    <form action="/create-order" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn">Objednat ihned!</button>
+                    </form>
+                    <form action="/stop-order" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="btn">Zrušit objednávku</button>
+                    </form>
+                </div>
+            <% } else { %>
+                <h1>Prazdný košík!</h1>
+            <% } %>
+        </main>
+        <%- include('../includes/end.ejs') %>
