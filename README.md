@@ -30,7 +30,7 @@
   <a href="https://czech-shop.herokuapp.com/">
     <img src="images/shop.png" alt="Logo" width="80%" height="auto">
   </a>
-
+<br /><br /><br />
 Simple server rendered web application. Sort items by price or name. <br />
 Add items to the cart. Modify cart by plus, minus butons or enter integer into input field. <br />
 Create order and print pdf file. <br />
