@@ -1,5 +1,4 @@
 [![Build Status][build-shield]][build-url]
-[![Contributors][contributors-shield]][contributors-url]
 [![MIT License][license-shield]][license-url]
 
 <!-- PROJECT LOGO -->
@@ -46,8 +45,6 @@ With admin access create and modify new shop items. <br />Configure inventory, p
 - [Nodemailer](https://nodemailer.com)
 
 ### Installation
-
-Enter folder: cd expressCart
 
 1. Create a folder to hold your installation: mkdir node-shop
 2. FTP/Copy the contents of the zip to your newly created folder
