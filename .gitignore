@@ -6,3 +6,4 @@ server.key
 data/invoices
 access.log
 enviromet-variables.txt
+package-lock.json
