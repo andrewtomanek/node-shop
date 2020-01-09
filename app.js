@@ -158,7 +158,7 @@ app.use((error, req, res, next) => {
 mongoose.set("useFindAndModify", false);
 
 mongoose
-  .connect(MONGODB_URI, { useNewUrlParser: true })
+  .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(result => {
     // https
     //   .createServer({ key: privateKey, cert: certificate }, app)
