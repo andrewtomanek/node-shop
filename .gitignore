@@ -6,4 +6,5 @@ server.key
 data/invoices
 access.log
 enviromet-variables.txt
+yarn.lock
 package-lock.json
