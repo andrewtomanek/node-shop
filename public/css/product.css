@@ -5,6 +5,15 @@
     display: block;
 }
 
+.sort__select {
+    font-size: 1.1rem;
+    text-align: center;
+    color: hsla(353, 32%, 32%,1);
+    border: 0.2rem solid hsla(353, 32%, 32%,1);
+    padding: 0.1rem;
+}
+}
+
 .card__header {
     display: grid;
     grid-template-rows: 5vh 5vh;

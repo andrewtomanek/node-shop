@@ -1,3 +1,19 @@
+.count__form {
+  display: grid;
+  grid-auto-flow: column;;
+  align-items: center;
+  justify-items: center;
+}
+
+.input__integer {
+  width: 2rem;
+  height: 100%;
+  padding: 0.1rem;
+  font-size: 1rem;
+  font-weight: normal;
+  font-family: "Source Sans Pro", "Palatino", monospace;
+}
+
 .cart__item h1,
 .cart__item h2 {
   margin-right: 1rem;
@@ -9,3 +25,4 @@
   max-width: 100%;
   max-height: 10vh;
 }
+

@@ -16,7 +16,7 @@
                                     <img class="cart-image" src="/<%= adminProducts[elem].imageUrl %>" >
                                     <h2>Skladem: <%= adminProducts[elem].stockQuantity %></h2>
                                     <% if (adminProducts[elem].stockQuantity > 0) { %>
-                                        <form action="/change-cart" method="POST">
+                                        <form class="count__form" action="/change-cart" method="POST">
                                             <input type="number"  value="<%= p.quantity %>" class="input__integer" step="1" pattern="\d+" name="productQuantity" min="1" max="100">
                                             <% for( let elem in adminProducts) {%>
                                                 <% if (adminProducts[elem]._id.toString() === p.productId._id.toString()) { %>
