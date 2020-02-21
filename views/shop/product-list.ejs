@@ -4,7 +4,9 @@
 
     <body>
         <%- include('../includes/navigation.ejs') %>
-
+        <% if (cartContent) { %>
+            <%- include('../includes/cart-panel.ejs') %>
+            <% } %>
             <main>
                 <% if (prods.length > 0) { %>
                 <div class="sort__controls">

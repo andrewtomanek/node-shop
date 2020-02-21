@@ -1,0 +1,27 @@
+    <link rel="stylesheet" href="/css/cart.css">
+    </head>
+
+        <div class="cart__widget-list">
+               <% let totalSum = 0  %>
+            <% cartContent.forEach(p => { %>
+                <% totalSum +=   p.productPrice * p.quantity%>
+    
+                <% for(let elem of productList) { %>
+
+                         <% if(elem._id.toString() == p.productId.toString()) { %>
+                    <span class="cart__widget-item">
+                    <p class="cart__widget-text"><%= elem.title %></p>
+                    <p class="cart__widget-text"><%= p.quantity %>Ks</p>
+                    <p class="cart__widget-text"><%= p.productPrice * p.quantity %>,-</p>
+                </span>
+                <% } %>
+                <% } %>
+                <% }) %>
+                <span class="cart__widget-item">
+                    <img class="cart__widget-image" src="/images/shopping-cart.png" alt="cart">
+                     <p class="cart__widget-sum">Celkem: <%= totalSum %>,-</p>
+                </span>
+        </div>
+
+
+        

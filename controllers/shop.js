@@ -10,6 +10,16 @@ const ITEMS_PER_PAGE = 3;
 exports.getProducts = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
+  let listOfItems;
+  let cartImems;
+  if (req.user) {
+    cartImems = req.user.cart.items;
+  } else {
+    cartImems = null;
+  }
+  Product.find().then(allProducts => {
+    listOfItems = allProducts;
+  });
 
   Product.find()
     .countDocuments()
@@ -22,6 +32,8 @@ exports.getProducts = (req, res, next) => {
     .then(products => {
       res.render("shop/product-list", {
         prods: products,
+        productList: listOfItems,
+        cartContent: cartImems,
         pageTitle: "Products",
         path: "/products",
         currentPage: page,
@@ -43,6 +55,7 @@ exports.sortProducts = (req, res, next) => {
   const page = +req.query.page || +req.body.currentPage;
   const sortMethod = req.body.sortMethod || "title";
   const obj = {};
+
   if (req.body.pickCategory) {
     obj.category = req.body.pickCategory;
   }
@@ -98,7 +111,6 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   const page = +req.query.page || 1;
   let totalItems;
-
   Product.find({ sale: true })
     .countDocuments()
     .then(numProducts => {
@@ -173,7 +185,9 @@ exports.postCart = (req, res, next) => {
             .skip((page - 1) * ITEMS_PER_PAGE)
             .limit(ITEMS_PER_PAGE);
         })
-        .then(() => res.redirect("/cart"));
+        .then(() => {
+          res.redirect("/cart");
+        });
     })
     .catch(err => {
       const error = new Error(err);

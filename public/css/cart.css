@@ -1,6 +1,6 @@
 .count__form {
   display: grid;
-  grid-auto-flow: column;;
+  grid-auto-flow: column;
   align-items: center;
   justify-items: center;
 }
@@ -26,3 +26,39 @@
   max-height: 10vh;
 }
 
+.cart__widget-list {
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  border-bottom: 0.5rem solid hsla(353, 32%, 32%,1);
+}
+
+.cart__widget-item {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0rem;
+  margin: 0;
+}
+
+.cart__widget-text {
+  padding: 0.2rem;
+  font-size: 1rem;
+  font-weight: normal;
+  font-family: "Source Sans Pro", "Palatino", monospace;
+}
+
+.cart__widget-sum {
+  padding: 0.2rem;
+  font-size: 1rem;
+  font-weight: normal;
+  font-family: "Source Sans Pro", "Palatino", monospace;
+  border: 0.1rem solid hsla(353, 32%, 32%,1);
+}
+
+.cart__widget-image {
+  width: 50%;
+}
