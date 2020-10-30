@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -12,7 +11,6 @@ const multer = require("multer");
 const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
-
 const errorController = require("./controllers/error");
 const shopController = require("./controllers/shop");
 const isAuth = require("./middleware/is-auth");
@@ -27,9 +25,6 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 const csrfProtection = csrf();
-
-// const privateKey = fs.readFileSync('server.key');
-// const certificate = fs.readFileSync('server.cert');
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -143,8 +138,6 @@ app.get("/500", errorController.get500);
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
-  // res.status(error.httpStatusCode).render(...);
-  // res.redirect('/500');
   console.log(error);
   res.status(500).render("500", {
     pageTitle: "Error!",
@@ -157,10 +150,7 @@ mongoose.set("useFindAndModify", false);
 
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then((result) => {
-    // https
-    //   .createServer({ key: privateKey, cert: certificate }, app)
-    //   .listen(process.env.PORT || 3000);
+  .then(() => {
     app.listen(process.env.PORT || 3000);
   })
   .catch((err) => {

@@ -158,8 +158,7 @@ exports.postCart = async (req, res, next) => {
     const product = await Product.findByIdAndUpdate(prodId, {
       stockQuantity: newStockQuantity,
     });
-    const productPrice = product.price;
-    req.user.addToCart(product, productQuantity, productPrice);
+    req.user.addToCart(product, productQuantity);
     res.redirect("/cart");
   } catch (err) {
     const error = new Error(err);
@@ -173,8 +172,8 @@ exports.changeCart = async (req, res, next) => {
   let productQuantity = req.body.productQuantity;
   const userProductsArray = req.user.cart.items;
 
-  userProductsArray.forEach(async (p) => {
-    try {
+  try {
+    userProductsArray.forEach(async (p) => {
       if (p.productId == prodId) {
         let product = await Product.findById(p.productId);
         newQuantity = productQuantity - p.quantity;
@@ -186,131 +185,70 @@ exports.changeCart = async (req, res, next) => {
         product = await Product.findByIdAndUpdate(prodId, {
           stockQuantity: newStockQuantity,
         });
-        imageUrl = product.imageUrl;
-        const productPrice = product.price;
-        req.user.modifyCart(product, productQuantity, productPrice);
-        res.redirect("/cart");
+        req.user.modifyCart(product, productQuantity);
       }
-    } catch (err) {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    }
-  });
-  /* 
-  userProductsArray.forEach((p) => {
-    if (p.productId == prodId) {
-      Product.findById(p.productId)
-        .then((product) => {
-          newQuantity = productQuantity - p.quantity;
-          newStockQuantity = product.stockQuantity - newQuantity;
-          if (newStockQuantity < 0) {
-            newStockQuantity = product.stockQuantity;
-            productQuantity = p.quantity;
-          }
-        })
-        .then(() =>
-          Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
-        )
-        .then((product) => {
-          imageUrl = product.imageUrl;
-          const productPrice = product.price;
-          return req.user.modifyCart(product, productQuantity, productPrice);
-        })
-        .then(() => res.redirect("/cart"))
-        .catch((err) => {
-          const error = new Error(err);
-          error.httpStatusCode = 500;
-          return next(error);
-        });
-    }
-  }); */
-};
-
-exports.postCartAddOneProduct = (req, res, next) => {
-  const prodId = req.body.productId;
-  Product.findById(prodId)
-    .then((product) => {
-      newStockQuantity = product.stockQuantity - 1;
-      return req.user.addToCart(product);
-    })
-    .then(() => {
-      res.redirect("/cart");
-      return Product.findByIdAndUpdate(prodId, {
-        stockQuantity: newStockQuantity,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
     });
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.postCartRemoveOneProduct = (req, res, next) => {
+exports.postCartAddOneProduct = async (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findById(prodId)
-    .then((product) => {
-      newStockQuantity = product.stockQuantity + 1;
-      return req.user.removeOneFromCart(product);
-    })
-    .then(() => {
-      res.redirect("/cart");
-      return Product.findByIdAndUpdate(prodId, {
-        stockQuantity: newStockQuantity,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+
+  try {
+    const product = await Product.findById(prodId);
+    newStockQuantity = product.stockQuantity - 1;
+    req.user.addToCart(product);
+    await Product.findByIdAndUpdate(prodId, {
+      stockQuantity: newStockQuantity,
     });
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.postCartDeleteProduct = (req, res, next) => {
+exports.postCartRemoveOneProduct = async (req, res, next) => {
+  const prodId = req.body.productId;
+
+  try {
+    const product = await Product.findById(prodId);
+    newStockQuantity = product.stockQuantity + 1;
+    req.user.removeOneFromCart(product);
+    await Product.findByIdAndUpdate(prodId, {
+      stockQuantity: newStockQuantity,
+    });
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.postCartDeleteProduct = async (req, res, next) => {
   const productQuantity = req.body.productQuantity;
   const prodId = req.body.productId;
-  Product.findById(prodId)
-    .then(
-      (product) =>
-        (newStockQuantity = +product.stockQuantity + +productQuantity)
-    )
-    .then(() =>
-      Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
-    )
-    .then(() => {
-      req.user.removeFromCart(prodId);
-      return res.redirect("/cart");
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
-};
 
-exports.getCheckout = (req, res, next) => {
-  req.user
-    .populate("cart.items.productId")
-    .execPopulate()
-    .then((user) => {
-      const products = user.cart.items;
-      let total = 0;
-      products.forEach((p) => {
-        total += p.quantity * p.productId.price;
-      });
-      res.render("shop/checkout", {
-        path: "/checkout",
-        pageTitle: "Checkout",
-        products: products,
-        totalSum: total,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const product = await Product.findById(prodId);
+    newStockQuantity = +product.stockQuantity + +productQuantity;
+    await Product.findByIdAndUpdate(prodId, {
+      stockQuantity: newStockQuantity,
     });
+    req.user.removeFromCart(prodId);
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.postOrder = (req, res, next) => {
