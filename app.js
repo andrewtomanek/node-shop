@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const https = require("https");
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -20,14 +19,12 @@ const isAuth = require("./middleware/is-auth");
 const User = require("./models/user");
 const Admin = require("./models/admins");
 
-const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${
-  process.env.MONGO_PASSWORD
-}@cluster0-w1yfz.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-w1yfz.mongodb.net/${process.env.MONGO_DEFAULT_DATABASE}`;
 
 const app = express();
 const store = new MongoDBStore({
   uri: MONGODB_URI,
-  collection: "sessions"
+  collection: "sessions",
 });
 const csrfProtection = csrf();
 
@@ -40,7 +37,7 @@ const fileStorage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     cb(null, new Date().getTime() + "-" + file.originalname);
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {
@@ -82,7 +79,7 @@ app.use(
     secret: "my secret",
     resave: false,
     saveUninitialized: false,
-    store: store
+    store: store,
   })
 );
 
@@ -99,14 +96,14 @@ app.use((req, res, next) => {
     return next();
   }
   User.findById(req.session.user._id)
-    .then(user => {
+    .then((user) => {
       if (!user) {
         return next();
       }
       req.user = user;
       next();
     })
-    .catch(err => {
+    .catch((err) => {
       next(new Error(err));
     });
 });
@@ -116,14 +113,14 @@ app.use((req, res, next) => {
     return next();
   }
   Admin.findById(req.session.admin._id)
-    .then(admin => {
+    .then((admin) => {
       if (!admin) {
         return next();
       }
       req.admin = admin;
       next();
     })
-    .catch(err => {
+    .catch((err) => {
       next(new Error(err));
     });
 });
@@ -148,10 +145,11 @@ app.use(errorController.get404);
 app.use((error, req, res, next) => {
   // res.status(error.httpStatusCode).render(...);
   // res.redirect('/500');
+  console.log(error);
   res.status(500).render("500", {
     pageTitle: "Error!",
     path: "/500",
-    isAuthenticated: req.session.isLoggedIn
+    isAuthenticated: req.session.isLoggedIn,
   });
 });
 
@@ -159,12 +157,12 @@ mongoose.set("useFindAndModify", false);
 
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(result => {
+  .then((result) => {
     // https
     //   .createServer({ key: privateKey, cert: certificate }, app)
     //   .listen(process.env.PORT || 3000);
     app.listen(process.env.PORT || 3000);
   })
-  .catch(err => {
+  .catch((err) => {
     console.log(err);
   });

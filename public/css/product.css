@@ -22,7 +22,7 @@
 }
 
 .product__title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     text-align: center;
 }
 
@@ -32,14 +32,14 @@
 }
 
 .product__price {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     text-align: center;
     color: hsla(353, 32%, 32%,1);
     width: 100%;
 }
 
 .product__sale {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     text-align: center;
     color: rgb(255, 0, 43);
     width: 100%;

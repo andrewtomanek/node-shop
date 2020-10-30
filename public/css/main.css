@@ -2,7 +2,7 @@
   --blue: hsla(211, 76%, 28%, 1);
   --red: hsla(353, 42%, 32%, 1);
   --wine: hsla(61, 81%, 74%, 1);
-  font-size: calc(1vw + 1vh + 0.5vmin);
+  font-size: calc(1vw + 1vh + 0.3vmin);
 }
 
 * {
@@ -211,7 +211,7 @@ input {
   font: inherit;
   text-decoration: none;
   color: black;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   padding: 0.5rem 2rem;
   background: transparent;
   border: none;

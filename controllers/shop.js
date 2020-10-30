@@ -7,203 +7,201 @@ const Order = require("../models/order");
 
 const ITEMS_PER_PAGE = 3;
 
-exports.getProducts = (req, res, next) => {
+exports.getProducts = async (req, res, next) => {
   const page = +req.query.page || 1;
-  let totalItems;
-  let listOfItems;
-  let cartImems;
+  let cartItems;
   if (req.user) {
-    cartImems = req.user.cart.items;
+    cartItems = req.user.cart.items;
   } else {
-    cartImems = null;
+    cartItems = null;
   }
-  Product.find().then(allProducts => {
-    listOfItems = allProducts;
-  });
 
-  Product.find()
-    .countDocuments()
-    .then(numProducts => {
-      totalItems = numProducts;
-      return Product.find()
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE);
-    })
-    .then(products => {
-      res.render("shop/product-list", {
-        prods: products,
-        productList: listOfItems,
-        cartContent: cartImems,
-        pageTitle: "Products",
-        path: "/products",
-        currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-        hasPreviousPage: page > 1,
-        nextPage: page + 1,
-        previousPage: page - 1,
-        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const listOfItems = await Product.find();
+    const totalItems = await Product.find().countDocuments();
+    const products = await Product.find()
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+    res.render("shop/product-list", {
+      prods: products,
+      productList: listOfItems,
+      cartContent: cartItems,
+      pageTitle: "Products",
+      path: "/products",
+      currentPage: page,
+      hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.sortProducts = (req, res, next) => {
+exports.sortProducts = async (req, res, next) => {
   const page = +req.query.page || +req.body.currentPage;
   const sortMethod = req.body.sortMethod || "title";
   const obj = {};
+  let cartItems;
+  if (req.user) {
+    cartItems = req.user.cart.items;
+  } else {
+    cartItems = null;
+  }
 
   if (req.body.pickCategory) {
     obj.category = req.body.pickCategory;
   }
   const category = obj;
-  let totalItems;
 
-  Product.find(category)
-    .countDocuments()
-    .then(numProducts => {
-      totalItems = numProducts;
-      return Product.find(category)
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE)
-        .sort(sortMethod);
-    })
-    .then(products => {
-      return res.render("shop/product-list", {
-        prods: products,
-        pageTitle: "Products",
-        path: "/products",
-        currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-        hasPreviousPage: page > 1,
-        nextPage: page + 1,
-        previousPage: page - 1,
-        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const listOfItems = await Product.find();
+    const totalItems = await Product.find(category).countDocuments();
+    const products = await Product.find(category)
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE)
+      .sort(sortMethod);
+    res.render("shop/product-list", {
+      prods: products,
+      productList: listOfItems,
+      cartContent: cartItems,
+      pageTitle: "Products",
+      path: "/products",
+      currentPage: page,
+      hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.getProduct = (req, res, next) => {
+exports.getProduct = async (req, res, next) => {
   const prodId = req.params.productId;
-  Product.findById(prodId)
-    .then(product => {
-      res.render("shop/product-detail", {
-        product: product,
-        pageTitle: product.title,
-        path: "/products"
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+
+  try {
+    const product = await Product.findById(prodId);
+    res.render("shop/product-detail", {
+      product: product,
+      pageTitle: product.title,
+      path: "/products",
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.getIndex = (req, res, next) => {
+exports.getIndex = async (req, res, next) => {
   const page = +req.query.page || 1;
-  let totalItems;
-  Product.find({ sale: true })
-    .countDocuments()
-    .then(numProducts => {
-      totalItems = numProducts;
-      return Product.find({ sale: true })
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE);
-    })
-    .then(products => {
-      res.render("shop/index", {
-        prods: products,
-        pageTitle: "Shop",
-        path: "/",
-        currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-        hasPreviousPage: page > 1,
-        nextPage: page + 1,
-        previousPage: page - 1,
-        lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+
+  try {
+    const totalItems = await Product.find({ sale: true }).countDocuments();
+    const products = await Product.find({ sale: true })
+      .skip((page - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
+    res.render("shop/index", {
+      prods: products,
+      pageTitle: "Shop",
+      path: "/",
+      currentPage: page,
+      hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+      hasPreviousPage: page > 1,
+      nextPage: page + 1,
+      previousPage: page - 1,
+      lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.getCart = (req, res, next) => {
-  req.user
-    .populate("cart.items.productId")
-    .execPopulate()
-    .then(user => {
-      const products = user.cart.items;
-      Product.find().then(adminProducts => {
-        res.render("shop/cart", {
-          path: "/cart",
-          pageTitle: "Your Cart",
-          products: products,
-          adminProducts: adminProducts
-        });
-      });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+exports.getCart = async (req, res, next) => {
+  try {
+    const user = await req.user.populate("cart.items.productId").execPopulate();
+    const products = user.cart.items;
+    const adminProducts = await Product.find();
+    res.render("shop/cart", {
+      path: "/cart",
+      pageTitle: "Your Cart",
+      products: products,
+      adminProducts: adminProducts,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.postCart = (req, res, next) => {
-  const page = +req.body.currentPage;
+exports.postCart = async (req, res, next) => {
   const prodId = req.body.productId;
   const productQuantity = req.body.productQuantity;
   const newStockQuantity = req.body.stockQuantity - productQuantity;
   if (newStockQuantity < 0) {
     return res.redirect("/cart");
   }
-  Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
-    .then(product => {
-      const productPrice = product.price;
-      return req.user.addToCart(product, productQuantity, productPrice);
-    })
-    .then(() => {
-      let totalItems;
 
-      Product.find()
-        .countDocuments()
-        .then(numProducts => {
-          totalItems = numProducts;
-          return Product.find()
-            .skip((page - 1) * ITEMS_PER_PAGE)
-            .limit(ITEMS_PER_PAGE);
-        })
-        .then(() => {
-          res.redirect("/cart");
-        });
-    })
-    .catch(err => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const product = await Product.findByIdAndUpdate(prodId, {
+      stockQuantity: newStockQuantity,
     });
+    const productPrice = product.price;
+    req.user.addToCart(product, productQuantity, productPrice);
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.changeCart = (req, res, next) => {
+exports.changeCart = async (req, res, next) => {
   const prodId = req.body.productId;
   let productQuantity = req.body.productQuantity;
   const userProductsArray = req.user.cart.items;
-  userProductsArray.forEach(p => {
+
+  userProductsArray.forEach(async (p) => {
+    try {
+      if (p.productId == prodId) {
+        let product = await Product.findById(p.productId);
+        newQuantity = productQuantity - p.quantity;
+        newStockQuantity = product.stockQuantity - newQuantity;
+        if (newStockQuantity < 0) {
+          newStockQuantity = product.stockQuantity;
+          productQuantity = p.quantity;
+        }
+        product = await Product.findByIdAndUpdate(prodId, {
+          stockQuantity: newStockQuantity,
+        });
+        imageUrl = product.imageUrl;
+        const productPrice = product.price;
+        req.user.modifyCart(product, productQuantity, productPrice);
+        res.redirect("/cart");
+      }
+    } catch (err) {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    }
+  });
+  /* 
+  userProductsArray.forEach((p) => {
     if (p.productId == prodId) {
       Product.findById(p.productId)
-        .then(product => {
+        .then((product) => {
           newQuantity = productQuantity - p.quantity;
           newStockQuantity = product.stockQuantity - newQuantity;
           if (newStockQuantity < 0) {
@@ -214,35 +212,35 @@ exports.changeCart = (req, res, next) => {
         .then(() =>
           Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
         )
-        .then(product => {
+        .then((product) => {
           imageUrl = product.imageUrl;
           const productPrice = product.price;
           return req.user.modifyCart(product, productQuantity, productPrice);
         })
         .then(() => res.redirect("/cart"))
-        .catch(err => {
+        .catch((err) => {
           const error = new Error(err);
           error.httpStatusCode = 500;
           return next(error);
         });
     }
-  });
+  }); */
 };
 
 exports.postCartAddOneProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
-    .then(product => {
+    .then((product) => {
       newStockQuantity = product.stockQuantity - 1;
       return req.user.addToCart(product);
     })
     .then(() => {
       res.redirect("/cart");
       return Product.findByIdAndUpdate(prodId, {
-        stockQuantity: newStockQuantity
+        stockQuantity: newStockQuantity,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -252,17 +250,17 @@ exports.postCartAddOneProduct = (req, res, next) => {
 exports.postCartRemoveOneProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
-    .then(product => {
+    .then((product) => {
       newStockQuantity = product.stockQuantity + 1;
       return req.user.removeOneFromCart(product);
     })
     .then(() => {
       res.redirect("/cart");
       return Product.findByIdAndUpdate(prodId, {
-        stockQuantity: newStockQuantity
+        stockQuantity: newStockQuantity,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -274,7 +272,8 @@ exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.findById(prodId)
     .then(
-      product => (newStockQuantity = +product.stockQuantity + +productQuantity)
+      (product) =>
+        (newStockQuantity = +product.stockQuantity + +productQuantity)
     )
     .then(() =>
       Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
@@ -283,7 +282,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
       req.user.removeFromCart(prodId);
       return res.redirect("/cart");
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -294,20 +293,20 @@ exports.getCheckout = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .execPopulate()
-    .then(user => {
+    .then((user) => {
       const products = user.cart.items;
       let total = 0;
-      products.forEach(p => {
+      products.forEach((p) => {
         total += p.quantity * p.productId.price;
       });
       res.render("shop/checkout", {
         path: "/checkout",
         pageTitle: "Checkout",
         products: products,
-        totalSum: total
+        totalSum: total,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -323,33 +322,33 @@ exports.postOrder = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .execPopulate()
-    .then(user => {
-      user.cart.items.forEach(p => {
+    .then((user) => {
+      user.cart.items.forEach((p) => {
         totalSum += p.quantity * p.productId.price;
         totalQuantity += p.quantity;
       });
 
-      const products = user.cart.items.map(i => {
+      const products = user.cart.items.map((i) => {
         return {
           quantity: i.quantity,
           productPrice: i.productPrice,
-          product: { ...i.productId._doc }
+          product: { ...i.productId._doc },
         };
       });
       const order = new Order({
         user: {
           email: req.user.email,
-          userId: req.user
+          userId: req.user,
         },
         products: products,
         totalQuantity: totalQuantity,
-        totalSum: totalSum
+        totalSum: totalSum,
       });
       return order.save();
     })
     .then(() => res.redirect("/orders"))
     .then(() => req.user.clearCart())
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -358,17 +357,18 @@ exports.postOrder = (req, res, next) => {
 
 exports.stornoOrder = (req, res, next) => {
   const userProductsArray = req.user.cart.items;
-  userProductsArray.forEach(p => {
+  userProductsArray.forEach((p) => {
     let prodId = p.productId;
     let productQuantity = p.quantity;
     Product.findById(prodId)
       .then(
-        product => (newStockQuantity = product.stockQuantity + productQuantity)
+        (product) =>
+          (newStockQuantity = product.stockQuantity + productQuantity)
       )
       .then(() =>
         Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
       )
-      .catch(err => {
+      .catch((err) => {
         const error = new Error(err);
         error.httpStatusCode = 500;
         return next(error);
@@ -380,7 +380,7 @@ exports.stornoOrder = (req, res, next) => {
     .then(() => {
       res.redirect("/cart");
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -389,14 +389,14 @@ exports.stornoOrder = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
   Order.find({ "user.userId": req.user._id })
-    .then(orders => {
+    .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",
         pageTitle: "Your Orders",
-        orders: orders
+        orders: orders,
       });
     })
-    .catch(err => {
+    .catch((err) => {
       const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
@@ -406,7 +406,7 @@ exports.getOrders = (req, res, next) => {
 exports.getInvoice = (req, res, next) => {
   const orderId = req.params.orderId;
   Order.findById(orderId)
-    .then(order => {
+    .then((order) => {
       if (!order) {
         return next(new Error("No order found."));
       }
@@ -426,7 +426,7 @@ exports.getInvoice = (req, res, next) => {
       pdfDoc.pipe(res);
 
       pdfDoc.fontSize(26).text("FAKTURA", {
-        underline: true
+        underline: true,
       });
       pdfDoc.fontSize(26).text("                                ");
 
@@ -439,7 +439,7 @@ exports.getInvoice = (req, res, next) => {
       pdfDoc.fontSize(26).text("                                ");
 
       let totalPrice = 0;
-      order.products.forEach(prod => {
+      order.products.forEach((prod) => {
         totalPrice += prod.quantity * prod.product.price;
         pdfDoc.fontSize(26).text("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ");
         pdfDoc.fontSize(26).text("                                ");
@@ -462,5 +462,5 @@ exports.getInvoice = (req, res, next) => {
 
       pdfDoc.end();
     })
-    .catch(err => next(err));
+    .catch((err) => next(err));
 };
