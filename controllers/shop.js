@@ -196,15 +196,14 @@ exports.changeCart = async (req, res, next) => {
   }
 };
 
-exports.postCartAddOneProduct = async (req, res, next) => {
+exports.addOneProduct = async (req, res, next) => {
   const prodId = req.body.productId;
 
   try {
     const product = await Product.findById(prodId);
-    newStockQuantity = product.stockQuantity - 1;
     req.user.addToCart(product);
     await Product.findByIdAndUpdate(prodId, {
-      stockQuantity: newStockQuantity,
+      stockQuantity: product.stockQuantity - 1,
     });
     res.redirect("/cart");
   } catch (err) {
@@ -214,15 +213,14 @@ exports.postCartAddOneProduct = async (req, res, next) => {
   }
 };
 
-exports.postCartRemoveOneProduct = async (req, res, next) => {
+exports.removeOneProduct = async (req, res, next) => {
   const prodId = req.body.productId;
 
   try {
     const product = await Product.findById(prodId);
-    newStockQuantity = product.stockQuantity + 1;
     req.user.removeOneFromCart(product);
     await Product.findByIdAndUpdate(prodId, {
-      stockQuantity: newStockQuantity,
+      stockQuantity: product.stockQuantity + 1,
     });
     res.redirect("/cart");
   } catch (err) {
@@ -232,7 +230,7 @@ exports.postCartRemoveOneProduct = async (req, res, next) => {
   }
 };
 
-exports.postCartDeleteProduct = async (req, res, next) => {
+exports.deleteProduct = async (req, res, next) => {
   const productQuantity = req.body.productQuantity;
   const prodId = req.body.productId;
 
@@ -382,12 +380,6 @@ exports.getInvoice = async (req, res, next) => {
     pdfDoc.fontSize(20).text("Celková hodnota v Kc:  " + totalPrice);
 
     pdfDoc.end();
-
-    res.render("shop/orders", {
-      path: "/orders",
-      pageTitle: "Your Orders",
-      orders: orders,
-    });
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;

@@ -21,15 +21,11 @@ router.post("/products", isAuth, shopController.sortProducts);
 
 router.post("/change-cart", isAuth, shopController.changeCart);
 
-router.post("/cart-add-one-item", isAuth, shopController.postCartAddOneProduct);
+router.post("/cart-add-one-item", isAuth, shopController.addOneProduct);
 
-router.post(
-  "/cart-remove-one-item",
-  isAuth,
-  shopController.postCartRemoveOneProduct
-);
+router.post("/cart-remove-one-item", isAuth, shopController.removeOneProduct);
 
-router.post("/cart-delete-item", isAuth, shopController.postCartDeleteProduct);
+router.post("/cart-delete-item", isAuth, shopController.deleteProduct);
 
 router.get("/orders", isAuth, shopController.getOrders);
 

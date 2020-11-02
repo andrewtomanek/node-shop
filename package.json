@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "set NODE_ENV=production&&set MONGO_USER=andrewtomanek&&set MONGO_PASSWORD=1clMFefUVKyxB6zZ&&set MONGO_DEFAULT_DATABASE=shop&&set STRIPE_KEY=sk_test_EpXboZfLKWj8PjIpMUVRdKZo&&set SENDGRID_API_KEY=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 PORT=3000&&nodemon app.js",
+    "dev": "PORT=3000&&nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
