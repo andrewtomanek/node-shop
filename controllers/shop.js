@@ -251,154 +251,146 @@ exports.postCartDeleteProduct = async (req, res, next) => {
   }
 };
 
-exports.postOrder = (req, res, next) => {
+exports.postOrder = async (req, res, next) => {
   // Token is created using Checkout or Elements!
   // Get the payment token ID submitted by the form:
   let totalSum = 0;
   let totalQuantity = 0;
 
-  req.user
-    .populate("cart.items.productId")
-    .execPopulate()
-    .then((user) => {
-      user.cart.items.forEach((p) => {
-        totalSum += p.quantity * p.productId.price;
-        totalQuantity += p.quantity;
-      });
-
-      const products = user.cart.items.map((i) => {
-        return {
-          quantity: i.quantity,
-          productPrice: i.productPrice,
-          product: { ...i.productId._doc },
-        };
-      });
-      const order = new Order({
-        user: {
-          email: req.user.email,
-          userId: req.user,
-        },
-        products: products,
-        totalQuantity: totalQuantity,
-        totalSum: totalSum,
-      });
-      return order.save();
-    })
-    .then(() => res.redirect("/orders"))
-    .then(() => req.user.clearCart())
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const user = await req.user.populate("cart.items.productId").execPopulate();
+    user.cart.items.forEach((p) => {
+      totalSum += p.quantity * p.productId.price;
+      totalQuantity += p.quantity;
     });
+    const products = user.cart.items.map((i) => {
+      return {
+        quantity: i.quantity,
+        productPrice: i.productPrice,
+        product: { ...i.productId._doc },
+      };
+    });
+    const order = new Order({
+      user: {
+        email: req.user.email,
+        userId: req.user,
+      },
+      products: products,
+      totalQuantity: totalQuantity,
+      totalSum: totalSum,
+    });
+    order.save();
+    req.user.clearCart();
+    res.redirect("/orders");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.stornoOrder = (req, res, next) => {
+exports.stornoOrder = async (req, res, next) => {
   const userProductsArray = req.user.cart.items;
-  userProductsArray.forEach((p) => {
-    let prodId = p.productId;
-    let productQuantity = p.quantity;
-    Product.findById(prodId)
-      .then(
-        (product) =>
-          (newStockQuantity = product.stockQuantity + productQuantity)
-      )
-      .then(() =>
-        Product.findByIdAndUpdate(prodId, { stockQuantity: newStockQuantity })
-      )
-      .catch((err) => {
-        const error = new Error(err);
-        error.httpStatusCode = 500;
-        return next(error);
-      });
-  });
 
-  req.user
-    .clearCart()
-    .then(() => {
-      res.redirect("/cart");
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    userProductsArray.forEach(async (p) => {
+      let prodId = p.productId;
+      const product = await Product.findById(prodId);
+      await Product.findByIdAndUpdate(prodId, {
+        stockQuantity: product.stockQuantity + p.quantity,
+      });
     });
+    req.user.clearCart();
+    res.redirect("/cart");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.getOrders = (req, res, next) => {
-  Order.find({ "user.userId": req.user._id })
-    .then((orders) => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: orders,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+exports.getOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ "user.userId": req.user._id });
+    res.render("shop/orders", {
+      path: "/orders",
+      pageTitle: "Your Orders",
+      orders: orders,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.getInvoice = (req, res, next) => {
+exports.getInvoice = async (req, res, next) => {
   const orderId = req.params.orderId;
-  Order.findById(orderId)
-    .then((order) => {
-      if (!order) {
-        return next(new Error("No order found."));
-      }
-      if (order.user.userId.toString() !== req.user._id.toString()) {
-        return next(new Error("Unauthorized"));
-      }
-      const invoiceName = "invoice-" + orderId + ".pdf";
-      const invoicePath = path.join("data", "invoices", invoiceName);
 
-      const pdfDoc = new PDFDocument();
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        'inline; filename="' + invoiceName + '"'
-      );
-      pdfDoc.pipe(fs.createWriteStream(invoicePath));
-      pdfDoc.pipe(res);
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return next(new Error("No order found."));
+    }
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error("Unauthorized"));
+    }
+    const invoiceName = "invoice-" + orderId + ".pdf";
+    const invoicePath = path.join("data", "invoices", invoiceName);
+    const pdfDoc = new PDFDocument();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'inline; filename="' + invoiceName + '"'
+    );
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+    pdfDoc.pipe(res);
 
-      pdfDoc.fontSize(26).text("FAKTURA", {
-        underline: true,
-      });
+    pdfDoc.fontSize(26).text("FAKTURA", {
+      underline: true,
+    });
+    pdfDoc.fontSize(26).text("                                ");
+
+    pdfDoc.fontSize(26).text("________________________________");
+    pdfDoc.fontSize(26).text("                                ");
+
+    pdfDoc
+      .fontSize(20)
+      .text("Název položky             množství            cena");
+    pdfDoc.fontSize(26).text("                                ");
+
+    let totalPrice = 0;
+    order.products.forEach((prod) => {
+      totalPrice += prod.quantity * prod.product.price;
+      pdfDoc.fontSize(26).text("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ");
       pdfDoc.fontSize(26).text("                                ");
-
-      pdfDoc.fontSize(26).text("________________________________");
-      pdfDoc.fontSize(26).text("                                ");
-
       pdfDoc
-        .fontSize(20)
-        .text("Název položky             množství            cena");
-      pdfDoc.fontSize(26).text("                                ");
+        .fontSize(16)
+        .text(
+          prod.product.title +
+            "                             " +
+            prod.quantity +
+            "                             " +
+            prod.product.price +
+            "Kc"
+        );
+    });
+    pdfDoc.fontSize(26).text("                                ");
+    pdfDoc.fontSize(26).text("________________________________");
+    pdfDoc.fontSize(26).text("                                ");
 
-      let totalPrice = 0;
-      order.products.forEach((prod) => {
-        totalPrice += prod.quantity * prod.product.price;
-        pdfDoc.fontSize(26).text("_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ ");
-        pdfDoc.fontSize(26).text("                                ");
-        pdfDoc
-          .fontSize(16)
-          .text(
-            prod.product.title +
-              "                             " +
-              prod.quantity +
-              "                             " +
-              prod.product.price +
-              "Kc"
-          );
-      });
-      pdfDoc.fontSize(26).text("                                ");
-      pdfDoc.fontSize(26).text("________________________________");
-      pdfDoc.fontSize(26).text("                                ");
+    pdfDoc.fontSize(20).text("Celková hodnota v Kc:  " + totalPrice);
 
-      pdfDoc.fontSize(20).text("Celková hodnota v Kc:  " + totalPrice);
+    pdfDoc.end();
 
-      pdfDoc.end();
-    })
-    .catch((err) => next(err));
+    res.render("shop/orders", {
+      path: "/orders",
+      pageTitle: "Your Orders",
+      orders: orders,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
